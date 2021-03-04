@@ -38,8 +38,8 @@ a,img{text-decoration:none;border:none;}
 	height: 100vh;
 	padding: 0;
 	background-color: #151515;
-	background-image: url(../image/bgOne.jpg);
-	background-size: 100% 100% !important;
+	background: url(../image/photo9.jpg);
+	background-size: 100% 1440px !important;
 	background-position: center;
 	background-attachment: fixed;
 	background-repeat: no-repeat
