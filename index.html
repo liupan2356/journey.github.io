@@ -132,6 +132,7 @@
     //电子围栏
     var circle;
     var longpressFlag;
+    var longpressTimeOut;
     const overlayStyle = {
         polygon: {
             color: '#5FF3F5',
@@ -558,7 +559,7 @@
     };
     ///添加手机APP画图的方法并交互
     function onLoadCircle(r, lnglat, style) {
-        if(longpressFlag) return
+        if (longpressFlag) return
         if (!map) {
             map = new T.Map('map');
             map.setMapType(TMAP_HYBRID_MAP)
@@ -589,9 +590,11 @@
             longpressFlag = true;
         });
         map.addEventListener("zoomend", function (e) {
-            setTimeout(function(){
+            longpressFlag = true;
+            if (longpressTimeOut) clearTimeout(longpressTimeOut);
+            longpressTimeOut = setTimeout(function () {
                 longpressFlag = false;
-            },5000)       
+            }, 5000)
         });
     }
     //给地图添加长按点击事件
@@ -602,10 +605,10 @@
             map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
         }
         addZoomstart()
-        map.addEventListener("longpress", function (e) {     
-            setTimeout(function(){
+        map.addEventListener("longpress", function (e) {
+            setTimeout(function () {
                 onLoadCircle(50, e.lnglat.lng + "," + e.lnglat.lat)
-            })           
+            })
         });
     }
 
