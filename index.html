@@ -128,6 +128,33 @@
     };
     var geocode;
     var locationGpsFlga = false;
+
+    //电子围栏
+    var circle;
+    const overlayStyle = {
+        polygon: {
+            color: '#5FF3F5',
+            opacity: 0.8,
+            weight: 2,
+            fillColor: '#5FF3F5',
+            fillOpacity: 0.40
+        },
+        circle: {
+            radius: '50',
+            color: '#5FF3F5',
+            opacity: 0.8,
+            weight: 2,
+            fillColor: '#5FF3F5',
+            fillOpacity: 0.40
+        },
+        rectangle: {
+            color: '#5FF3F5',
+            opacity: 0.8,
+            weight: 2,
+            fillColor: '#5FF3F5',
+            fillOpacity: 0.40
+        }
+    };
     function onLoadHis() {
         if (!map) {
             map = new T.Map('map');
@@ -150,6 +177,7 @@
             // nrvpMarker('116.40769', '39.89945')
             // nrvpLabel('116.40769', '39.89945')
         }
+        addLongpress()
     }
 
     //地图放大
@@ -520,13 +548,49 @@
         })
         //创建地图文本对象
         map.addOverLay(label);
-    }
+    };
     //清除地图上的所有覆盖物
     function clearAllOverLay() {
         if (label) map.removeOverLay(label);
         if (marker) map.removeOverLay(marker);
 
+    };
+    ///添加手机APP画图的方法并交互
+    function onLoadCircle(r, lnglat, style) {
+        if (!map) {
+            map = new T.Map('map');
+            map.setMapType(TMAP_HYBRID_MAP)
+            map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+        }
+        let _opt = null;
+        if (lnglat) {          
+            let _lnglat = lnglat.split(',')
+            _opt = new T.LngLat(_lnglat[0], _lnglat[1])
+        } else {
+            _opt = new T.LngLat(116.40093, 39.90313)
+        }
+        let _styleP = Object.assign(overlayStyle.circle, style)
+        if (circle) map.removeOverLay(circle);
+        // 定义该矩形的显示区域
+        circle = new T.Circle(_opt, r, _styleP);
+        //向地图上添加圆
+        map.addOverLay(circle);
+        //给APP发送数据
+        alert(lnglat)
     }
+
+    //给地图添加长按点击事件
+    function addLongpress(){
+        if (!map) {
+            map = new T.Map('map');
+            map.setMapType(TMAP_HYBRID_MAP)
+            map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+        }
+        map.addEventListener("longpress",function(e){
+            onLoadCircle(50,e.lnglat.lng + "," + e.lnglat.lat)
+        });
+    }
+
 </script>
 
 </html>
