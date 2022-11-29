@@ -178,6 +178,8 @@
             // nrvpLabel('116.40769', '39.89945')
         }
         addLongpress()
+
+        // addZoomstart()
     }
 
     //地图放大
@@ -571,14 +573,30 @@
         }
         let _styleP = Object.assign(overlayStyle.circle, style)
         if (circle) map.removeOverLay(circle);
+        if (marker) map.removeOverLay(marker);
         // 定义该矩形的显示区域
         circle = new T.Circle(_opt, r, _styleP);
+        marker = new T.Marker(_opt);
+        map.addOverLay(marker);
         //向地图上添加圆
         map.addOverLay(circle);
         //给APP发送数据
         alert(lnglat)
     }
-
+    //添加手机地图方法
+    function addZoomstart(){
+        if (!map) {
+            map = new T.Map('map');
+            map.setMapType(TMAP_HYBRID_MAP)
+            map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+        }
+        map.addEventListener("zoomstart",function(e){
+            alert(444)
+        });
+        map.addEventListener("zoomend",function(e){
+            alert(555)
+        });
+    }
     //给地图添加长按点击事件
     function addLongpress(){
         if (!map) {
@@ -590,7 +608,7 @@
             onLoadCircle(50,e.lnglat.lng + "," + e.lnglat.lat)
         });
     }
-
+   
 </script>
 
 </html>
