@@ -179,7 +179,7 @@
         }
         addLongpress()
 
-        // addZoomstart()
+        addZoomstart()
     }
 
     //地图放大
@@ -581,7 +581,7 @@
         //向地图上添加圆
         map.addOverLay(circle);
         //给APP发送数据
-        alert(lnglat)
+
     }
     //添加手机地图方法
     function addZoomstart(){
@@ -590,11 +590,11 @@
             map.setMapType(TMAP_HYBRID_MAP)
             map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
         }
-        map.addEventListener("zoomstart",function(e){
-            alert(444)
-        });
         map.addEventListener("zoomend",function(e){
-            alert(555)
+            if(e.target.getZoom() != zoom){
+                zoom = e.target.getZoom()
+                alert(111)
+            }    
         });
     }
     //给地图添加长按点击事件
