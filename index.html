@@ -131,7 +131,6 @@
 
     //电子围栏
     var circle;
-    var longpressFlag;
     const overlayStyle = {
         polygon: {
             color: '#5FF3F5',
@@ -179,8 +178,6 @@
             // nrvpLabel('116.40769', '39.89945')
         }
         addLongpress()
-
-        addZoomstart()
     }
 
     //地图放大
@@ -560,7 +557,6 @@
     };
     ///添加手机APP画图的方法并交互
     function onLoadCircle(r, lnglat, style) {
-        if (longpressFlag) return;
         if (!map) {
             map = new T.Map('map');
             map.setMapType(TMAP_HYBRID_MAP)
@@ -586,19 +582,20 @@
 
     }
     //添加手机地图方法
-    function addZoomstart() {
-        if (!map) {
-            map = new T.Map('map');
-            map.setMapType(TMAP_HYBRID_MAP)
-            map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
-        }
-        map.addEventListener("zoomstart", function (e) {
-            longpressFlag = true;
-        });
-        map.addEventListener("zoomend", function (e) {
-            longpressFlag = false;
-        });
-    }
+    // function addZoomstart() {
+    //     if (!map) {
+    //         map = new T.Map('map');
+    //         map.setMapType(TMAP_HYBRID_MAP)
+    //         map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+    //     }
+    //     map.addEventListener("zoomstart", function (e) {
+    //         longpressFlag = true;
+    //     });
+    //     map.addEventListener("zoomend", function (e) {
+    //         if(zoom)
+    //         longpressFlag = false;
+    //     });
+    // }
     //给地图添加长按点击事件
     function addLongpress() {
         if (!map) {
@@ -606,7 +603,8 @@
             map.setMapType(TMAP_HYBRID_MAP)
             map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
         }
-        map.addEventListener("longpress", function (e) {
+        map.enablePinchToZoom()
+        map.addEventListener("longpress", function (e) {     
             onLoadCircle(50, e.lnglat.lng + "," + e.lnglat.lat)
         });
     }
