@@ -179,7 +179,6 @@
             // nrvpMarker('116.40769', '39.89945')
             // nrvpLabel('116.40769', '39.89945')
         }
-        addLongpress()
     }
 
     //地图放大
@@ -594,7 +593,7 @@
             if (longpressTimeOut) clearTimeout(longpressTimeOut);
             longpressTimeOut = setTimeout(function () {
                 longpressFlag = false;
-            }, 5000)
+            }, 3000)
         });
     }
     //给地图添加长按点击事件
