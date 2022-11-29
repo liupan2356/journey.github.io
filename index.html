@@ -592,12 +592,12 @@
             map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
         }
         map.addEventListener("zoomstart", function (e) {
-            alert(222)
             longpressFlag = true;
         });
         map.addEventListener("zoomend", function (e) {
-            alert(333)
-            longpressFlag = false;
+            setTimeout(function(){
+                longpressFlag = false;
+            })       
         });
     }
     //给地图添加长按点击事件
@@ -609,7 +609,6 @@
         }
         map.addEventListener("longpress", function (e) {     
             setTimeout(function(){
-                alert(111)
                 onLoadCircle(50, e.lnglat.lng + "," + e.lnglat.lat)
             })           
         });
