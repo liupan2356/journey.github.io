@@ -580,8 +580,10 @@
         map.addOverLay(marker);
         //向地图上添加圆
         map.addOverLay(circle);
+        
         //给APP发送数据
-        webMap.loadPoint(lnglat);
+        alert(lnglat)
+        webMap.loadPoint(lnglat.split(',')[0], lnglat.split(',')[1]);
 
     }
     //添加手机地图方法
