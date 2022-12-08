@@ -82,12 +82,14 @@
             let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux')
             var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
             if (isAndroid) {
-                webMap = window.webMap[fun]
+                return false;
+                //webMap = window.webMap[fun]
             }
             if (isIOS) {
-                webMap = window.webkit.messageHandlers[fun].postMessage
+                return true;
+                //webMap = window.webkit.messageHandlers[fun].postMessage
             }
-            return webMap
+            //return webMap
         }
     </script>
 </head>
@@ -618,8 +620,11 @@
         marker = new T.Marker(_opt);
         map.addOverLay(marker);
         //发送数据
-        isApp('loadPoint')(lng, lat)
-
+        if(isApp()){
+             window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
+        }else{
+            webMap.loadPoint(lng, lat)
+        }
     }
 
 
