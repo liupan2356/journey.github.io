@@ -619,6 +619,7 @@
         // 定义该矩形的显示区域
         marker = new T.Marker(_opt);
         map.addOverLay(marker);
+        alert(lng,lat)
         //发送数据
         if(isApp()){
              window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
