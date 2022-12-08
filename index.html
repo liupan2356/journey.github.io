@@ -590,7 +590,7 @@
             _lnglat = lnglat.split(',')
             _opt = new T.LngLat(_lnglat[0], _lnglat[1])
         } else {
-           return 
+            return
         }
         let _styleP = Object.assign(overlayStyle.circle, style)
         if (circle) map.removeOverLay(circle);
@@ -619,12 +619,14 @@
         // 定义该矩形的显示区域
         marker = new T.Marker(_opt);
         map.addOverLay(marker);
-        alert(lng,lat)
+
         //发送数据
         //true为IOS FALSE为安卓
-        if(isApp()){
-             window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
-        }else{
+        if (isApp()) {
+            alert('ios:' + lng + ',' + lat)
+            window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
+        } else {
+            alert('Android:' + lng + ',' + lat)
             webMap.loadPoint(lng, lat)
         }
     }
