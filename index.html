@@ -178,6 +178,7 @@
             // //测试
             // nrvpMarker('116.40769', '39.89945')
             // nrvpLabel('116.40769', '39.89945')
+            addLongpress() 
         }
     }
 
@@ -557,7 +558,8 @@
 
     };
     ///添加手机APP画图的方法并交互
-    function onLoadCircle(r, lnglat, style) {
+    //type 1 长按画点  type 2 修改半径
+    function onLoadCircle(r, lnglat, style,type) {
         if (longpressFlag) return
         if (!map) {
             map = new T.Map('map');
@@ -565,8 +567,9 @@
             map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
         }
         let _opt = null;
+        let _lnglat = [];
         if (lnglat) {
-            let _lnglat = lnglat.split(',')
+            _lnglat = lnglat.split(',')
             _opt = new T.LngLat(_lnglat[0], _lnglat[1])
         } else {
             _opt = new T.LngLat(116.40093, 39.90313)
@@ -579,13 +582,12 @@
         marker = new T.Marker(_opt);
         map.addOverLay(marker);
         //向地图上添加圆
-        map.addOverLay(circle);
-        
-        //给APP发送数据
-        alert(lnglat)
-        webMap.loadPoint(lnglat.split(',')[0], lnglat.split(',')[1]);
-
+        map.addOverLay(circle);             
+        if(type = 1){
+            webMap.loadPoint(_lnglat[0], _lnglat[1]);
+        }      
     }
+
     //添加手机地图方法
     function addZoomstart() {
         map.addEventListener("zoomstart", function (e) {
@@ -599,6 +601,7 @@
             }, 3000)
         });
     }
+  
     //给地图添加长按点击事件
     function addLongpress() {
         if (!map) {
@@ -613,7 +616,6 @@
             })
         });
     }
-
 </script>
 
 </html>
