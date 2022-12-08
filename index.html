@@ -81,6 +81,8 @@
                 app = navigator.appVersion;
             let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux')
             var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+            alert('isAndroid',isAndroid)
+            alert('isAndroid',isIOS)
             if (isAndroid) {
                 return false;
                 //webMap = window.webMap[fun]
@@ -622,13 +624,13 @@
 
         //发送数据
         //true为IOS FALSE为安卓
-        if (isApp()) {
+        //if (isApp()) {
             alert('ios:' + lng + ',' + lat)
-            window.webkit.messageHandlers.loadPoint.postMessage(lng + ',' + lat)
-        } else {
-            alert('Android:' + lng + ',' + lat)
-            webMap.loadPoint(lng, lat)
-        }
+        //    window.webkit.messageHandlers.loadPoint.postMessage(lng + ',' + lat)
+       // } else {
+        //    alert('Android:' + lng + ',' + lat)
+         //   webMap.loadPoint(lng, lat)
+//}
     }
 
 
