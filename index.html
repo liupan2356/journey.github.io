@@ -200,6 +200,10 @@
             // nrvpMarker('116.40769', '39.89945')
             // nrvpLabel('116.40769', '39.89945')
             // addLongpress()
+            alert('地图加载完成')
+            //发送数据
+            window.webkit.messageHandlers.loadPoint.postMessage(105 + ',' + 85)
+
         }
     }
 
