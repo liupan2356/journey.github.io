@@ -81,8 +81,6 @@
                 app = navigator.appVersion;
             let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux')
             var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-            alert('isAndroid', isAndroid)
-            alert('isAndroid', isIOS)
             if (isAndroid) {
                 return false;
                 //webMap = window.webMap[fun]
@@ -92,6 +90,7 @@
                 //webMap = window.webkit.messageHandlers[fun].postMessage
             }
             //return webMap
+            return false
         }
     </script>
 </head>
@@ -117,9 +116,11 @@
     var zoom = 18;
     //1通过手机定位执行地块圈地，2获取手机定位，3持续获取手机定位
     var reportLocationtype;
+    //覆盖物
     var polygonTool;
     var polygon;
     var PolylineTool;
+    var circle;
     var points;
     var marker;
     var label;
@@ -129,6 +130,12 @@
     //当前位置
     var detaillocation;
     var lo;
+    //长按事件处理判断
+    var longpressFlag;
+    var longpressTimeOut;
+    //地理位置
+    var geocode;
+    var locationGpsFlga = false;
     var options = {
         enableHighAccuracy: true,
         timeout: 2000,
@@ -147,13 +154,6 @@
         lat: '',
         lng: ''
     };
-    var geocode;
-    var locationGpsFlga = false;
-
-    //电子围栏
-    var circle;
-    var longpressFlag;
-    var longpressTimeOut;
     const overlayStyle = {
         polygon: {
             color: '#5FF3F5',
@@ -178,6 +178,7 @@
             fillOpacity: 0.40
         }
     };
+    //加载地图方案
     function onLoadHis() {
         if (!map) {
             map = new T.Map('map');
@@ -199,15 +200,12 @@
             // //测试
             // nrvpMarker('116.40769', '39.89945')
             // nrvpLabel('116.40769', '39.89945')
-            // addLongpress()
-            alert('地图加载完成')
+            //addLongpress()
+
             //发送数据
 
             //window.webkit.messageHandlers.loadPoint.postMessage(105 + ',' + 85)
-
-            window.webkit.messageHandlers.loadpoint.postMessage({
-                "body": "11111"
-            });
+            //nationalMarker('115', '30', '1')
 
         }
     }
@@ -612,7 +610,7 @@
         map.addOverLay(circle);
     }
 
-    //获取点位
+    //长按获取点位 IOS Android 发送数据
     function onLoadPoint(lng, lat) {
         if (longpressFlag) return
         if (!map) {
@@ -627,21 +625,60 @@
             return
         }
         if (marker) map.removeOverLay(marker);
-        // 定义该矩形的显示区域
-        marker = new T.Marker(_opt);
+        // 定义该点
+        marker = createMarker(lng, lat)
         map.addOverLay(marker);
-
-        //发送数据
-        //true为IOS FALSE为安卓
-        //if (isApp()) {
-        alert('ios:' + lng + ',' + lat)
-        window.webkit.messageHandlers.loadPoint.postMessage(lng + ',' + lat)
-        // } else {
-        //    alert('Android:' + lng + ',' + lat)
-        //   webMap.loadPoint(lng, lat)
-        //}
+        //发送数据true为IOS FALSE为安卓
+        if (isApp()) {
+            alert('ios:' + lng + ',' + lat)
+            window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
+        } else {
+            alert('Android:' + lng + ',' + lat)
+            webMap.loadPoint(lng, lat)
+        }
     }
 
+    //自适应图标 创建图标返回图标对象
+    function createIcon(type) {
+        let url = null;
+        switch (type) {
+            case '1':
+                url = './image/mapIcon/icon-location-s@3x.png'
+                break;
+            default:
+                url = './image/mapIcon/icon-location-s@3x.png'
+                break;
+        };
+        let _icon = new T.Icon({
+            iconUrl: url,
+            iconSize: new T.Point(36, 36),
+            iconAnchor: new T.Point(18, 35)
+        });
+
+        return _icon;
+    }
+    //更具点位创建marker
+    function createMarker(longitude, latitude, icon) {
+        let _icon = createIcon(icon)
+        if (marker) map.removeOverLay(marker);
+        let lnglat = new T.LngLat(longitude, latitude)
+        //定义marker
+        marker = new T.Marker(lnglat, {
+            icon: _icon,
+            title: '',
+        });
+        return marker
+    }
+    //通用接口定义图标
+    //尺寸 36*36
+    function nationalMarker(longitude, latitude, iconType) {
+        if (marker) map.removeOverLay(marker);
+        let _icon = createIcon(iconType);
+        marker = createMarker(longitude, latitude, _icon)
+        map.addOverLay(marker);
+        //聚焦
+        map.setViewport([new T.LngLat(longitude, latitude)])
+    }
 
     //添加手机地图方法
     function addZoomstart() {
