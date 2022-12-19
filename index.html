@@ -82,16 +82,19 @@
             let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux')
             var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
             if (isAndroid) {
-                return false;
-                //webMap = window.webMap[fun]
+               // return false;
+               alert(window.webMap[fun])
+               return window.webMap[fun]
+
             }
             if (isIOS) {
-                return true;
-                //webMap = window.webkit.messageHandlers[fun].postMessage
+                //return true;
+                return window.webkit.messageHandlers[fun].postMessage
             }
             //return webMap
             return false
         }
+        isApp('loadPoint')
     </script>
 </head>
 
@@ -701,6 +704,7 @@
             window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
         } else {
             alert('Android:' + lng + ',' + lat)
+            isApp('loadPoint')(lng, lat)
             webMap.loadPoint(lng, lat)
         }
     }
