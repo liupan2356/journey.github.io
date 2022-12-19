@@ -82,20 +82,16 @@
             let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux')
             var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
             if (isAndroid) {
-               // return false;
-               alert(window.webMap,fun)
-               alert(window.webMap[fun])
-               return window.webMap[fun]
-
+                return false;
+                //webMap = window.webMap[fun]
             }
             if (isIOS) {
-                //return true;
-                return window.webkit.messageHandlers[fun].postMessage
+                return true;
+                //webMap = window.webkit.messageHandlers[fun].postMessage
             }
             //return webMap
             return false
         }
-       
     </script>
 </head>
 
@@ -226,7 +222,7 @@
 
 
             //画轨迹方法
-            //let data = '115.821563,39.480072#115.826916,39.478458#115.828692,39.477881'
+            // let data = '115.821563,39.480072#115.826916,39.478458#115.828692,39.477881'
             // for (var i = 0; i < 100; i++) {
 
             //     if (i == 99) {
@@ -244,10 +240,7 @@
             // setInterval(function () {
             //     trackReplaying(data, JSON.stringify({ color: "#0070D2" }))
             // }, 1000)
-            setTimeout(function(){
-                isApp('loadPoint')
-            },5000)
-           
+
         }
     }
 
@@ -708,7 +701,6 @@
             window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
         } else {
             alert('Android:' + lng + ',' + lat)
-            isApp('loadPoint')(lng, lat)
             webMap.loadPoint(lng, lat)
         }
     }
