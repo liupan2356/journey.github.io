@@ -222,7 +222,7 @@
 
 
             //画轨迹方法
-             //let data = '115.821563,39.480072#115.826916,39.478458#115.828692,39.477881'
+            //let data = '115.821563,39.480072#115.826916,39.478458#115.828692,39.477881'
             // for (var i = 0; i < 100; i++) {
 
             //     if (i == 99) {
@@ -234,7 +234,7 @@
             // console.log(data)
             // _dataArr = data.split('#');
 
-             //historicalRoute(data,JSON.stringify({color:"#FF51EB"}))
+            //historicalRoute(data,JSON.stringify({color:"#FF51EB"}))
 
 
             // setInterval(function(){
@@ -267,8 +267,7 @@
     }
 
     //定义划轨迹点位的方法
-    function historicalRoute(data) {
-        alert('historicalRoute2' + typeof data)
+    function historicalRoute(data, style) {
         if (!data) {
             return
         } else {
@@ -279,7 +278,7 @@
                 points.push(new T.LngLat(_objArr[0], _objArr[1]));
             };
             lnglatArr = points;
-            let _styleP = Object.assign(polylineStyle, JSON.parse('{}'))
+            let _styleP = Object.assign(polylineStyle, JSON.parse(style))
             console.log(_styleP)
             //创建线对象
             line = new T.Polyline(points, _styleP);
@@ -292,7 +291,6 @@
 
     //定义轨迹回放的方法
     function trackReplaying(data, style) {
-        alert('trackReplaying',data)
         if (!data) {
             return
         } else {
