@@ -95,7 +95,7 @@
             //return webMap
             return false
         }
-        isApp('loadPoint')
+       
     </script>
 </head>
 
@@ -244,7 +244,10 @@
             // setInterval(function () {
             //     trackReplaying(data, JSON.stringify({ color: "#0070D2" }))
             // }, 1000)
-
+            setTimeout(function(){
+                isApp('loadPoint')
+            },5000)
+           
         }
     }
 
