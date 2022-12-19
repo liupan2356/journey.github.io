@@ -125,6 +125,8 @@
     var marker;
     var label;
     var line;
+    var trackLine;
+    var trackMarker;
     //天地图key
     var mapKey = "bff6b76492ebb706fd7c39b07acf6569";
     //当前位置
@@ -178,6 +180,17 @@
             fillOpacity: 0.40
         }
     };
+    const polylineStyle = {
+        color: '#0000FF',
+        opacity: 0.5,
+        weight: 3,
+        lineStyle: 'solid',
+    };
+    //测试
+    // let _dataArr = [];
+
+    // let _index = 0;
+
     //加载地图方案
     function onLoadHis() {
         if (!map) {
@@ -207,6 +220,28 @@
             //window.webkit.messageHandlers.loadPoint.postMessage(105 + ',' + 85)
             //nationalMarker('115', '30', '1')
 
+
+            //画轨迹方法
+            // let data = ''
+            // for (var i = 0; i < 100; i++) {
+
+            //     if (i == 99) {
+            //         data += (120 + Number(Math.random().toFixed(2))) + ',' + (70 + Number(Math.random().toFixed(2)))
+            //     } else {
+            //         data += (120 + Number(Math.random().toFixed(2))) + ',' + (70 + Number(Math.random().toFixed(2))) + '#'
+            //     }
+            // }
+            // console.log(data)
+            // _dataArr = data.split('#');
+            // historicalRoute(data,JSON.stringify({color:"#FF51EB"}))
+
+
+            // setInterval(function(){
+            //     _index++
+            //     let _d = _dataArr.slice(0,_index)
+            //     trackReplaying(_d,JSON.stringify({color:"#432371"}))
+            // },1000)
+
         }
     }
 
@@ -231,7 +266,7 @@
     }
 
     //定义划轨迹点位的方法
-    function historicalRoute(data) {
+    function historicalRoute(data, style) {
         if (!data) {
             return
         } else {
@@ -242,8 +277,10 @@
                 points.push(new T.LngLat(_objArr[0], _objArr[1]));
             };
             lnglatArr = points;
+            let _styleP = Object.assign(polylineStyle, JSON.parse(style))
+            console.log(_styleP)
             //创建线对象
-            line = new T.Polyline(points);
+            line = new T.Polyline(points, _styleP);
             //向地图上添加线
             map.addOverLay(line);
             map.setViewport(lnglatArr)
@@ -251,6 +288,31 @@
         return line
     }
 
+    //定义轨迹回放的方法
+    function trackReplaying(data, style) {
+        if (!data) {
+            return
+        } else {
+            var _data = data.split('#');
+            var points = [];
+            for (var i = 0; i < _data.length; i++) {
+                var _objArr = _data[i].split(',');
+                points.push(new T.LngLat(_objArr[0], _objArr[1]));
+            };
+            //lnglatArr = points;
+            let _styleP = Object.assign(polylineStyle, JSON.parse(style))
+            if (trackLine) map.removeOverLay(trackLine);
+            if (trackMarker) map.removeOverLay(trackMarker);
+            //创建线对象
+            trackLine = new T.Polyline(points, _styleP);
+            trackMarker = createMarker(_data[_data.length - 1].split(',')[0], data[_data.length - 1].split(',')[1])
+            //向地图上添加线
+            map.addOverLay(trackLine);
+            map.addOverLay(trackMarker);
+            // map.setViewport(lnglatArr)
+
+        }
+    }
     function onLoadPolygon(data) {
         if (!map) {
             map = new T.Map('map');
