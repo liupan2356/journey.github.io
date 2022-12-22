@@ -292,7 +292,6 @@
 
     //定义轨迹回放的方法
     function trackReplaying(data, style) {
-        alert(data)
         if (!data) {
             return
         } else {
@@ -307,7 +306,6 @@
             if (style) {
                 _styleP = Object.assign(polylineStyle, JSON.parse(style))
             }
-            alert(JSON.parse(style));
             if (trackLine) map.removeOverLay(trackLine);
             if (trackMarker) map.removeOverLay(trackMarker);
             //创建线对象
