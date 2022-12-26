@@ -690,17 +690,15 @@
             _opt = new T.LngLat(lng, lat)
         } else {
             return
-        }
+        }                                                                                                                                               
         if (marker) map.removeOverLay(marker);
         // 定义该点
         marker = createMarker(lng, lat)
         map.addOverLay(marker);
         //发送数据true为IOS FALSE为安卓
         if (isApp()) {
-            alert('ios:' + lng + ',' + lat)
             window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
         } else {
-            alert('Android:' + lng + ',' + lat)
             webMap.loadPoint(lng, lat)
         }
     }
