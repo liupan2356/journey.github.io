@@ -240,7 +240,6 @@
             // setInterval(function () {
             //     trackReplaying(data, JSON.stringify({ color: "#0070D2" }))
             // }, 1000)
-
         }
     }
 
@@ -668,6 +667,7 @@
         } else {
             return
         }
+        alert(lnglat)
         let _styleP = Object.assign(overlayStyle.circle, style)
         if (circle) map.removeOverLay(circle);
         //if (marker) map.removeOverLay(marker);
@@ -699,6 +699,7 @@
         if (isApp()) {
             window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
         } else {
+            alert(lng, lat)
             webMap.loadPoint(lng, lat)
         }
     }
