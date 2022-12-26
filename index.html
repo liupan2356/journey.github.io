@@ -654,7 +654,9 @@
     };
     ///添加手机APP画图的方法并交互
     function onLoadCircle(r, lnglat, style) {
+        alert(longpressFlag)
         if (longpressFlag) return
+        
         if (!map) {
             map = new T.Map('map');
             map.setMapType(TMAP_HYBRID_MAP)
@@ -662,17 +664,21 @@
         }
         let _opt = null;
         let _lnglat = [];
+
         if (lnglat) {
             _lnglat = lnglat.split(',')
             _opt = new T.LngLat(_lnglat[0], _lnglat[1])
         } else {
             return
         }
+        
         let _styleP = Object.assign(overlayStyle.circle, style)
+        alert(lnglat)
         if (circle) map.removeOverLay(circle);
         //if (marker) map.removeOverLay(marker);
         // 定义该矩形的显示区域
         circle = new T.Circle(_opt, r, _styleP);
+     
         //向地图上添加圆
         map.addOverLay(circle);
     }
