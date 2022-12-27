@@ -695,10 +695,14 @@
         marker = createMarker(lng, lat)
         map.addOverLay(marker);
         //发送数据true为IOS FALSE为安卓
+        let result = JSON.stringify({
+                lng:lng,
+                lat:lat
+            })
         if (isApp()) {
-            window.webkit.messageHandlers.loadPoint.postMessage(lng + "," + lat)
+            window.webkit.messageHandlers.loadPoint.postMessage(result)
         } else {
-            webMap.loadPoint(lng + '', lat + '')
+            webMap.loadPoint(result)
         }
     }
 
