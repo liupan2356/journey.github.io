@@ -79,10 +79,8 @@
         function isApp(fun) {
             let u = navigator.userAgent,
                 app = navigator.appVersion;
-            let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux')
+            let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1;
             var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-            alert('isAndroid:'+isAndroid)
-            alert('isIOS:'+isIOS)
             if (isAndroid) {
                 return false;
                 //webMap = window.webMap[fun]
@@ -242,7 +240,7 @@
             // setInterval(function () {
             //     trackReplaying(data, JSON.stringify({ color: "#0070D2" }))
             // }, 1000)
-           //addLongpress()
+            addLongpress()
         }
     }
 
@@ -679,7 +677,7 @@
     }
 
     //长按获取点位 IOS Android 发送数据
-    function onLoadPoint(lng,lat) {  
+    function onLoadPoint(lng, lat) {
         if (longpressFlag) return
         if (!map) {
             map = new T.Map('map');
@@ -698,9 +696,9 @@
         map.addOverLay(marker);
         //发送数据true为IOS FALSE为安卓
         if (isApp()) {
-            window.webkit.messageHandlers.loadPoint.postMessage(lng+"", lat+"")
+            window.webkit.messageHandlers.loadPoint.postMessage(lng + "", lat + "")
         } else {
-            webMap.loadPoint(lng+'', lat+'')
+            webMap.loadPoint(lng + '', lat + '')
         }
     }
 
@@ -780,7 +778,7 @@
         addZoomstart()
         addDragstart()
         map.addEventListener("longpress", function (e) {
-            setTimeout(function () {         
+            setTimeout(function () {
                 onLoadPoint(e.lnglat.lng, e.lnglat.lat)
             })
         });
