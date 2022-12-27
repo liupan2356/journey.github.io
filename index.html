@@ -240,7 +240,7 @@
             // setInterval(function () {
             //     trackReplaying(data, JSON.stringify({ color: "#0070D2" }))
             // }, 1000)
-           //addLongpress()
+            //addLongpress()
         }
     }
 
@@ -677,7 +677,7 @@
     }
 
     //长按获取点位 IOS Android 发送数据
-    function onLoadPoint(lng,lat) {  
+    function onLoadPoint(lng, lat) {
         if (longpressFlag) return
         if (!map) {
             map = new T.Map('map');
@@ -698,7 +698,7 @@
         if (isApp()) {
             window.webkit.messageHandlers.loadPoint.postMessage(lng, lat)
         } else {
-            webMap.loadPoint(lng+'', lat+'')
+            webMap.loadPoint(lng + '', lat + '')
         }
     }
 
@@ -747,24 +747,39 @@
     //添加手机地图方法
     function addZoomstart() {
         map.addEventListener("zoomstart", function (e) {
-            longpressFlag = true;
+            map.removeEventListener("longpress", function (e) {
+               
+            });
         });
         map.addEventListener("zoomend", function (e) {
             //longpressFlag = false;
-            longpressFlag = true;
-            if (longpressTimeOut) clearTimeout(longpressTimeOut);
-            longpressTimeOut = setTimeout(function () {
-                longpressFlag = false;
-            }, 100)
+            // longpressFlag = true;
+            // if (longpressTimeOut) clearTimeout(longpressTimeOut);
+            // longpressTimeOut = setTimeout(function () {
+            //     longpressFlag = false;
+            // }, 100)
+            map.addEventListener("longpress", function (e) {
+                setTimeout(function () {
+                    onLoadPoint(e.lnglat.lng, e.lnglat.lat)
+                })
+            });
         });
     }
     //禁用拖拽
     function addDragstart() {
         map.addEventListener("dragstart", function (e) {
-            longpressFlag = true;
+            map.removeEventListener("longpress", function (e) {
+               
+            });
+            //longpressFlag = true;
         });
         map.addEventListener("dragend", function (e) {
-            longpressFlag = false;
+            map.addEventListener("longpress", function (e) {
+                setTimeout(function () {
+                    onLoadPoint(e.lnglat.lng, e.lnglat.lat)
+                })
+            });
+            //longpressFlag = false;
         });
     }
 
@@ -778,7 +793,7 @@
         addZoomstart()
         addDragstart()
         map.addEventListener("longpress", function (e) {
-            setTimeout(function () {         
+            setTimeout(function () {
                 onLoadPoint(e.lnglat.lng, e.lnglat.lat)
             })
         });
