@@ -749,7 +749,6 @@
     //添加手机地图方法
     function addZoomstart() {
         map.addEventListener("touchmove", function (e) {
-            alert(e.type)
             map.removeEventListener("longpress", longpressCallBack);
         });
         map.addEventListener("touchend", function (e) {
