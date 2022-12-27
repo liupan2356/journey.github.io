@@ -696,7 +696,7 @@
         map.addOverLay(marker);
         //发送数据true为IOS FALSE为安卓
         if (isApp()) {
-            window.webkit.messageHandlers.loadPoint.postMessage(lng + "", lat + "")
+            window.webkit.messageHandlers.loadPoint.postMessage(lng + "," + lat)
         } else {
             webMap.loadPoint(lng + '', lat + '')
         }
