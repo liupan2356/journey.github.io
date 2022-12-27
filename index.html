@@ -81,6 +81,8 @@
                 app = navigator.appVersion;
             let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux')
             var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+            alert('isAndroid:'+isAndroid)
+            alert('isIOS:'+isIOS)
             if (isAndroid) {
                 return false;
                 //webMap = window.webMap[fun]
