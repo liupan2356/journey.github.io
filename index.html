@@ -750,12 +750,12 @@
             longpressFlag = true;
         });
         map.addEventListener("zoomend", function (e) {
-            longpressFlag = false;
-            // longpressFlag = true;
-            // if (longpressTimeOut) clearTimeout(longpressTimeOut);
-            // longpressTimeOut = setTimeout(function () {
-            //     longpressFlag = false;
-            // }, 1000)
+            //longpressFlag = false;
+            longpressFlag = true;
+            if (longpressTimeOut) clearTimeout(longpressTimeOut);
+            longpressTimeOut = setTimeout(function () {
+                longpressFlag = false;
+            }, 100)
         });
     }
     //禁用拖拽
