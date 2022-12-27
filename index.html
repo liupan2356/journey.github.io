@@ -757,6 +757,15 @@
             }, 3000)
         });
     }
+    //禁用拖拽
+    function addDragstart() {
+        map.addEventListener("dragstart", function (e) {
+            longpressFlag = true;
+        });
+        map.addEventListener("dragend", function (e) {
+            longpressFlag = false;
+        });
+    }
 
     //给地图添加长按点击事件
     function addLongpress() {
@@ -766,8 +775,9 @@
             map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
         }
         addZoomstart()
+        addDragstart()
         map.addEventListener("longpress", function (e) {
-            setTimeout(function () {
+            setTimeout(function () {         
                 onLoadPoint(e.lnglat.lng, e.lnglat.lat)
             })
         });
