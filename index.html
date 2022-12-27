@@ -748,10 +748,11 @@
 
     //添加手机地图方法
     function addZoomstart() {
-        map.addEventListener("zoomstart", function (e) {
+        map.addEventListener("touchmove", function (e) {
+            alert(e.type)
             map.removeEventListener("longpress", longpressCallBack);
         });
-        map.addEventListener("zoomend", function (e) {
+        map.addEventListener("touchend", function (e) {
             //longpressFlag = false;
             // longpressFlag = true;
             // if (longpressTimeOut) clearTimeout(longpressTimeOut);
@@ -773,6 +774,7 @@
         });
     }
     function longpressCallBack(e) {
+       
         setTimeout(function () {
             onLoadPoint(e.lnglat.lng, e.lnglat.lat)
         })
