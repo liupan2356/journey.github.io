@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+    <title>地图轨迹</title>
+    <script src="https://api.tianditu.gov.cn/api?v=4.0&tk=bff6b76492ebb706fd7c39b07acf6569" onload="onLoadHis()"
+        type="text/javascript" charset="UTF-8" defer="defer" async="true"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        /* html {
+            font-size: 100px;
+        } */
+
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* .dingwei {
+            position: absolute;
+            z-index: 999;
+            right: 10px;
+            top: 10px;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            font-size: 0.14rem;
+            background-color: #fff;
+        }
+
+        .startCurrentPosition {
+            position: absolute;
+            z-index: 999;
+            left: 10px;
+            bottom: 10px;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            font-size: 0.14rem;
+            background-color: #fff;
+        }
+
+        .stopCurrentPosition {
+            position: absolute;
+            z-index: 999;
+            right: 10px;
+            bottom: 10px;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            font-size: 0.14rem;
+            background-color: #fff;
+        } */
+        .tdt-label,
+        .tdt-label0,
+        .tdt-label1 {
+            box-shadow: 0px 0px 3px #E2E2E2 !important;
+            border-radius: 2px;
+            border: none !important;
+            font-family: "PingFangSC-Semibold, PingFang SC";
+            padding: 2px 10px !important;
+        }
+    </style>
+    <script>
+        //js来判断是Android还是ios
+        //参数方法
+
+        function isApp(fun) {
+            let u = navigator.userAgent,
+                app = navigator.appVersion;
+            let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1;
+            var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+            if (isAndroid) {
+                return false;
+                //webMap = window.webMap[fun]
+            }
+            if (isIOS) {
+                return true;
+                //webMap = window.webkit.messageHandlers[fun].postMessage
+            }
+            //return webMap
+            return false
+        }
+    </script>
+</head>
+
+<body>
+    <div id="map">
+        <!-- <p class="dingwei" onclick="getCurrentPosition()">
+            定位
+        </p>
+        <p class="startCurrentPosition" onclick="startCurrentPosition()">
+            开始
+        </p>
+        <p class="stopCurrentPosition" onclick="stopCurrentPosition()">
+            结束
+        </p> -->
+        <!-- <input type="button" id="button1" onClick="zoomIn()" value="放大地图" style="position: relative;z-index: 999;" />
+        <input type="button" id="button2" onClick="zoomOut()" value="缩小地图" style="position: relative;z-index: 999;" /> -->
+    </div>
+
+</body>
+<script>
+    var map;
+    var zoom = 18;
+    //1通过手机定位执行地块圈地，2获取手机定位，3持续获取手机定位
+    var reportLocationtype;
+    //覆盖物
+    var polygonTool;
+    var polygon;
+    var PolylineTool;
+    var circle;
+    var points;
+    var marker;
+    var label;
+    var line;
+    var trackLine;
+    var trackMarker;
+    //天地图key
+    var mapKey = "bff6b76492ebb706fd7c39b07acf6569";
+    //当前位置
+    var detaillocation;
+    var lo;
+    //长按事件处理判断
+    var longpressFlag;
+    var longpressTimeOut;
+    //地理位置
+    var geocode;
+    var locationGpsFlga = false;
+    var options = {
+        enableHighAccuracy: true,
+        timeout: 2000,
+        maximumAge: 0
+    };
+    var config = {
+        showLabel: true,
+        color: "red", weight: 3, opacity: 0.5, fillColor: "#EB300A", fillOpacity: 0.5
+    };
+    var lnglatArr = [];
+    var startLnglat = {
+        lat: '',
+        lng: ''
+    };
+    var startLnglatFlag = {
+        lat: '',
+        lng: ''
+    };
+    const overlayStyle = {
+        polygon: {
+            color: '#5FF3F5',
+            opacity: 0.8,
+            weight: 2,
+            fillColor: '#5FF3F5',
+            fillOpacity: 0.40
+        },
+        circle: {
+            radius: '50',
+            color: '#5FF3F5',
+            opacity: 0.8,
+            weight: 2,
+            fillColor: '#5FF3F5',
+            fillOpacity: 0.40
+        },
+        rectangle: {
+            color: '#5FF3F5',
+            opacity: 0.8,
+            weight: 2,
+            fillColor: '#5FF3F5',
+            fillOpacity: 0.40
+        }
+    };
+    const polylineStyle = {
+        color: '#0000FF',
+        opacity: 0.5,
+        weight: 3,
+        lineStyle: 'solid',
+    };
+    //测试
+    // let _dataArr = [];
+
+    // let _index = 0;
+    //地图初始化
+    function initMap() {
+        map = new T.Map('map');
+        map.setMapType(TMAP_HYBRID_MAP)
+        map.centerAndZoom(new T.LngLat(116.39122, 39.90556), zoom);
+    }
+    //加载地图方案
+    function onLoadHis() {
+        if (!map) {
+            initMap()
+            // //自定义算距离
+            // var str = "116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.35034,40.04624#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.34996,40.0467#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622#116.35036,40.04622"
+            // var lnglatArr = []
+            // _lnglatArr = str.split('#');
+            // _lnglatArr.map(function (item, index) {
+            //     var _objArr = item.split(',')
+            //     lnglatArr.push(new T.LngLat(_objArr[0], _objArr[1]))
+            // })
+            // console.log(lnglatArr)
+            // var PolylineTool = new T.PolylineTool(map);
+            // var area = PolylineTool.getDistance(lnglatArr);
+            // console.log(area)
+
+            // //测试
+            // nrvpMarker('116.40769', '39.89945')
+            // nrvpLabel('116.40769', '39.89945')
+            //addLongpress()
+
+            //发送数据
+
+            //window.webkit.messageHandlers.loadPoint.postMessage(105 + ',' + 85)
+            //nationalMarker('115', '30', '1')
+
+
+            //画轨迹方法
+            // let data = '115.821563,39.480072#115.826916,39.478458#115.828692,39.477881'
+            // for (var i = 0; i < 100; i++) {
+
+            //     if (i == 99) {
+            //         data += (120 + Number(Math.random().toFixed(2))) + ',' + (70 + Number(Math.random().toFixed(2)))
+            //     } else {
+            //         data += (120 + Number(Math.random().toFixed(2))) + ',' + (70 + Number(Math.random().toFixed(2))) + '#'
+            //     }
+            // }
+            // console.log(data)
+            // _dataArr = data.split('#');
+
+            // historicalRoute(data, JSON.stringify({ color: "#FF3649" }))
+
+
+            // setInterval(function () {
+            //     trackReplaying(data, JSON.stringify({ color: "#0070D2" }))
+            // }, 1000)
+        }
+    }
+    //
+    function centering() {
+        if (map) {
+            map.centerAndZoom(new T.LngLat(116.39122, 39.90556), zoom);
+        } else {
+            initMap()
+        }
+    }
+    //地图放大
+    function zoomIn() {
+        if (map) {
+            map.zoomIn()
+        }
+    }
+    //地图缩小
+    function zoomOut() {
+        if (map) {
+            map.zoomOut()
+        }
+    }
+    //地图定位
+    function locationGps() {
+        if (map) {
+            locationGpsFlga = true;
+            webMap.getGps();
+        }
+    }
+
+    //定义划轨迹点位的方法
+    function historicalRoute(data, style) {
+        if (!data) {
+            return
+        } else {
+            var _data = data.split('#');
+            var points = [];
+            for (var i = 0; i < _data.length; i++) {
+                var _objArr = _data[i].split(',');
+                points.push(new T.LngLat(_objArr[0], _objArr[1]));
+            };
+            lnglatArr = points;
+            //lnglatArr = points;
+            let _styleP = polylineStyle;
+            if (style) {
+                _styleP = Object.assign(polylineStyle, JSON.parse(style))
+            }
+            //创建线对象
+            line = new T.Polyline(points, _styleP);
+            //向地图上添加线
+            map.addOverLay(line);
+            map.setViewport(lnglatArr)
+        }
+        return line
+    }
+
+    //定义轨迹回放的方法
+    function trackReplaying(data, style) {
+        if (!data) {
+            return
+        } else {
+            var _data = data.split('#');
+            var points = [];
+            for (var i = 0; i < _data.length; i++) {
+                var _objArr = _data[i].split(',');
+                points.push(new T.LngLat(_objArr[0], _objArr[1]));
+            };
+            //lnglatArr = points;
+            let _styleP = polylineStyle;
+            if (style) {
+                _styleP = Object.assign(polylineStyle, JSON.parse(style))
+            }
+            if (trackLine) map.removeOverLay(trackLine);
+            if (trackMarker) map.removeOverLay(trackMarker);
+            //创建线对象
+            trackLine = new T.Polyline(points, _styleP);
+            trackMarker = createMarker(_data[_data.length - 1].split(',')[0], _data[_data.length - 1].split(',')[1])
+            //向地图上添加线
+            map.addOverLay(trackLine);
+            map.addOverLay(trackMarker);
+            // map.setViewport(lnglatArr)
+
+        }
+    }
+    function onLoadPolygon(data) {
+        if (!map) {
+            initMap()
+        }
+        if (!data) {
+            return
+        } else {
+            var _data = data.split('#');
+            var points = [];
+            for (var i = 0; i < _data.length; i++) {
+                var _objArr = _data[i].split(',');
+                points.push(new T.LngLat(_objArr[0], _objArr[1]));
+            };
+            lnglatArr = points;
+            polygonTool = new T.Polygon(lnglatArr, config);
+            map.addOverLay(polygonTool)
+            map.setViewport(lnglatArr)
+        }
+        return polygonTool
+    }
+
+    //追加轨迹点位信息
+    function addPoints(transferGeoPoints) {
+        if (!transferGeoPoints) {
+            return
+        } else {
+            _lnglatArr = transferGeoPoints.split('#');
+            _lnglatArr.map(function (item, index) {
+                var _objArr = item.split(',')
+                lnglatArr.push(new T.LngLat(_objArr[0], _objArr[1]))
+            })
+            if (lnglatArr.length > 0) {
+                if (line) map.clearOverLays();
+                line = new T.Polyline(lnglatArr);
+                map.addOverLay(line);
+                map.setViewport(lnglatArr)
+            }
+        }
+        return line
+    }
+
+
+    //通过手机打点获取地块形状
+    function onLoadEnclosure() {
+        reportLocationtype = 2;
+        //允许鼠标双击放大地图
+        if (!map) {
+            map = new T.Map('map');
+            map.setMapType(TMAP_HYBRID_MAP)
+        }
+        webMap.getGps();
+    }
+    //画多边形
+    function openPolygonTool() {
+        if (lnglatArr.length > 0) {
+            if (polygonTool) map.clearOverLays();
+            var config = {
+                showLabel: true,
+                color: "red", weight: 3, opacity: 0.5, fillColor: "#EB300A", fillOpacity: 0.5
+            };
+            polygonTool = new T.Polygon(lnglatArr, config);
+            map.addOverLay(polygonTool)
+            getPoints()
+        } else {
+            showHtmlcallJava2(JSON.stringify(''), '', '')
+        }
+    }
+    //保存
+    function save() {
+        if (map) map.clearOverLays();
+        var _lnglatArr = lnglatArr;
+        lnglatArr = [];
+        getPoints()
+    }
+    //展示数据
+    function getPoints() {
+        var currentLnglats = lnglatArr;
+        PolygonTool = new T.PolygonTool(map);
+        PolylineTool = new T.PolylineTool(map);
+        var area = PolygonTool.getArea(currentLnglats);
+        var distance = PolylineTool.getDistance(currentLnglats);
+        showHtmlcallJava2(JSON.stringify(lnglatArr), area.toFixed(2), Number(distance).toFixed(2))
+    }
+    //撤销操作
+    function clearOverLays(e) {
+        if (map) map.clearOverLays();
+        lnglatArr = [];
+        // detailBox.style.display = 'none';
+        //showHtmlcallJava2(JSON.stringify(lnglatArr), '', '')
+        // return JSON.stringify(lnglatArr)
+    }
+    //撤销上一个点位
+    function revocation() {
+        lnglatArr = lnglatArr.slice(0, -1)
+        openPolygonTool()
+    }
+
+    //调用方法
+    function showHtmlcallJava2(arr, area, perimeter) {
+        //调用android中的方法
+        var _arr = JSON.parse(arr);
+        var _arrstr = ''
+        if (_arr.length > 0) {
+            _arr.map(function (item, index) {
+                _arrstr += item.lng + ',' + item.lat
+                if (index < _arr.length - 1) {
+                    _arrstr += '#'
+                }
+            })
+        }
+        webMap.refreshPoints(_arrstr);
+        webMap.result(area, perimeter);
+    }
+    //画多边形
+    function initPolygonTool(lnglat) {
+        if (!lnglat) {
+            return
+        } else {
+            _lnglatArr = lnglat.split('#');
+            _lnglatArr.map(function (item, index) {
+                var _objArr = item.split(',')
+                lnglatArr.push(new T.LngLat(_objArr[0], _objArr[1]))
+            })
+            if (lnglatArr.length > 0) {
+                if (polygonTool) map.clearOverLays();
+                var config = {
+                    showLabel: true,
+                    color: "red", weight: 3, opacity: 0.5, fillColor: "#EB300A", fillOpacity: 0.5
+                };
+                polygonTool = new T.Polygon(lnglatArr, config);
+                map.addOverLay(polygonTool)
+
+                getPoints()
+            }
+        }
+    };
+    //加载地图
+    function onLoadLocationMap() {
+        reportLocationtype = 1;
+        //初始化地图对象
+        if (!map) {
+            map = new T.Map('map');
+            map.setMapType(TMAP_HYBRID_MAP)
+        }
+        //设置显示地图的中心点和级别
+        map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+        polygon = new T.Polygon(lnglatArr, config);
+        PolylineTool = new T.PolylineTool(map);
+        polygonTool = new T.PolygonTool(map);
+        map.addOverLay(polygon)
+        lo = new T.Geolocation();
+        fn = function (e) {
+            if (this.getStatus() == 0 || this.getStatus() == 1) {
+                map.centerAndZoom(e.lnglat, 18)
+                lnglatArr.push(e.lnglat)
+                if (lnglatArr.length > 1) {
+                    var _arrstr = '';
+                    lnglatArr.map(function (item, index) {
+                        _arrstr += item.lng + ',' + item.lat
+                        if (index < lnglatArr.length - 1) {
+                            _arrstr += '#'
+                        }
+                    })
+                    webMap.refreshPoints(_arrstr);
+                }
+                if (marker) map.removeOverLay(marker)
+                marker = new T.Marker(e.lnglat);
+                map.addOverLay(marker);
+                if (polygon) map.removeOverLay(polygon);
+                polygon = new T.Polygon(lnglatArr, config);
+                map.addOverLay(polygon)
+            }
+        }
+        lo.getCurrentPosition(fn);
+    };
+
+    function getCurrentPosition() {
+        //开始定位
+        lo.getCurrentPosition(function (e) {
+            if (this.getStatus() == 0) {
+                map.centerAndZoom(e.lnglat, 18)
+            }
+            if (this.getStatus() == 1) {
+                map.centerAndZoom(e.lnglat, e.level)
+            }
+        });
+    };
+    //轮询打点
+    function startCurrentPosition() {
+        if (!points) {
+
+        } else {
+            clearInterval(points);
+        };
+        points = setInterval(function () {
+            // lo.getCurrentPosition(fn);
+            webMap.getGps();
+        }, 2000)
+    }
+    function stopCurrentPosition() {
+        clearInterval(points);
+        points = null;
+        if (polygon) map.removeOverLay(polygon);
+        polygonTool = new T.PolygonTool(map);
+        map.addOverLay(polygon)
+        let _lnglatArr = lnglatArr;
+        var _arrstr = '';
+        if (_lnglatArr.length > 0) {
+            _lnglatArr.map(function (item, index) {
+                _arrstr += item.lng + ',' + item.lat
+                if (index < _lnglatArr.length - 1) {
+                    _arrstr += '#'
+                }
+            })
+        }
+        webMap.refreshPoints(_arrstr);
+        webMap.result(polygonTool.getArea(_lnglatArr).toFixed(2), Number(PolylineTool.getDistance(_lnglatArr)).toFixed(2));
+        lnglatArr = [];
+        return _lnglatArr
+    }
+    //通过经纬度转换为地理位置信息
+    function onLoadGeocode(longitude, latitude) {
+        // map = new T.Map("map");
+        // map.centerAndZoom(new T.LngLat(116.40969, 39.89945), zoom);
+        geocode = new T.Geocoder();
+        geocode.getLocation(new T.LngLat(longitude, latitude), searchResult);
+    }
+    function searchResult(result) {
+        if (result.getStatus() == 0) {
+            var str = result.getAddress()
+            webMap.getAddress(str);
+        } else {
+            webMap.getAddress('');
+        }
+    }
+
+    //通过GPS获取地理点位信息处理方法
+    function reportLocation(latitude, longitude) {
+        if (locationGpsFlga) {
+            map.centerAndZoom(new T.LngLat(longitude, latitude), 18)
+            locationGpsFlga = false;
+            return
+        }
+        if (reportLocationtype == 1) {
+            map.centerAndZoom(new T.LngLat(longitude, latitude), zoom)
+            lnglatArr.push(new T.LngLat(longitude, latitude))
+            if (lnglatArr.length > 1) {
+                var _arrstr = '';
+                lnglatArr.map(function (item, index) {
+                    _arrstr += item.lng + ',' + item.lat
+                    if (index < lnglatArr.length - 1) {
+                        _arrstr += '#'
+                    }
+                })
+                polygonTool = new T.PolygonTool(map);
+                PolylineTool = new T.PolylineTool(map);
+                webMap.refreshPoints(_arrstr);
+                webMap.result(polygonTool.getArea(lnglatArr).toFixed(2), Number(PolylineTool.getDistance(lnglatArr)).toFixed(2));
+            }
+            if (marker) map.removeOverLay(marker)
+            marker = new T.Marker(new T.LngLat(longitude, latitude));
+            map.addOverLay(marker);
+            if (polygon) map.removeOverLay(polygon);
+            polygon = new T.Polygon(lnglatArr, config);
+            map.addOverLay(polygon)
+        } else if (reportLocationtype == 2) {
+            map.centerAndZoom(new T.LngLat(longitude, latitude), zoom);
+            map.enableScrollWheelZoom();
+            map.addEventListener('click', function (e) {
+                var lnglat = e.lnglat
+                lnglatArr.push(lnglat)
+                openPolygonTool()
+            })
+            PolygonTool = new T.PolygonTool(map);
+            PolylineTool = new T.PolylineTool(map);
+            map.setViewport(lnglatArr)
+        } else if (reportLocationtype == 3) {
+            map.centerAndZoom(new T.LngLat(longitude, latitude), zoom);
+            if (marker) map.removeOverLay(marker)
+            marker = new T.Marker(new T.LngLat(longitude, latitude));
+            map.addOverLay(marker);
+        }
+    }
+
+    //手机绕地暂停
+    function pauseLocation() {
+        reportLocationtype = 3
+    }
+
+
+    //手机绕地继续
+    function continueLocation() {
+        reportLocationtype = 1
+    }
+
+
+    //国四APP直接定位点位信息
+    function nrvpMarker(longitude, latitude) {
+        if (marker) map.removeOverLay(marker)
+        var icon = new T.Icon({
+            iconUrl: "image/dingwei-d-pic.png",
+            iconSize: new T.Point(67, 67),
+            iconAnchor: new T.Point(33, 65)
+        });
+        marker = new T.Marker(new T.LngLat(longitude, latitude), { icon: icon });
+        map.addOverLay(marker);
+        map.setViewport([new T.LngLat(longitude, latitude)])
+    }
+
+    function nrvpLabel(longitude, latitude, vin) {
+        if (label) map.removeOverLay(label)
+        let text = 'VIN : ' + vin
+        label = new T.Label({
+            text: text,
+            position: new T.LngLat(longitude, latitude),
+        });
+        label.setFontSize(12)
+        label.setFontColor('#666666')
+        label.setBackgroundColor('#FFFFFF')
+        setTimeout(function () {
+            label.setOffset(new T.Point(-(label._labelWidth / 2) - 10, 20))
+        })
+        //创建地图文本对象
+        map.addOverLay(label);
+    };
+    //清除地图上的所有覆盖物
+    function clearAllOverLay() {
+        if (label) map.removeOverLay(label);
+        if (marker) map.removeOverLay(marker);
+
+    };
+    ///添加手机APP画图的方法并交互
+    function onLoadCircle(r, lnglat, style) {
+        if (longpressFlag) return
+        if (!map) {
+            initMap()
+        }
+        let _opt = null;
+        let _lnglat = [];
+        if (lnglat) {
+            _lnglat = lnglat.split(',')
+            _opt = new T.LngLat(_lnglat[0], _lnglat[1])
+        } else {
+            return
+        }
+        let _styleP = Object.assign(overlayStyle.circle, style)
+        if (circle) map.removeOverLay(circle);
+        //if (marker) map.removeOverLay(marker);
+        // 定义该矩形的显示区域
+        circle = new T.Circle(_opt, Number(r), _styleP);
+        //向地图上添加圆
+        map.addOverLay(circle);
+    }
+
+    //长按获取点位 IOS Android 发送数据
+    function onLoadPoint(lng, lat) {
+        if (longpressFlag) return
+        if (!map) {
+            initMap()
+        }
+        let _opt = null;
+        if (lng && lat) {
+            _opt = new T.LngLat(lng, lat)
+        } else {
+            return
+        }
+        if (marker) map.removeOverLay(marker);
+        // 定义该点
+        marker = createMarker(lng, lat)
+        map.addOverLay(marker);
+        //发送数据true为IOS FALSE为安卓
+        let result = JSON.stringify({
+            lng: lng,
+            lat: lat
+        })
+        if (isApp()) {
+            window.webkit.messageHandlers.loadPoint.postMessage(result)
+        } else {
+            webMap.loadPoint(result)
+        }
+    }
+
+    //自适应图标 创建图标返回图标对象
+    function createIcon(type) {
+        let url = null;
+        switch (type) {
+            case '1':
+                url = './image/mapIcon/icon-location-s@3x.png'
+                break;
+            default:
+                url = './image/mapIcon/icon-location-s@3x.png'
+                break;
+        };
+        let _icon = new T.Icon({
+            iconUrl: url,
+            iconSize: new T.Point(36, 36),
+            iconAnchor: new T.Point(18, 35)
+        });
+
+        return _icon;
+    }
+    //更具点位创建marker
+    function createMarker(longitude, latitude, icon) {
+        let _icon = createIcon(icon)
+        if (marker) map.removeOverLay(marker);
+        let lnglat = new T.LngLat(longitude, latitude)
+        //定义marker
+        marker = new T.Marker(lnglat, {
+            icon: _icon,
+            title: '',
+        });
+        return marker
+    }
+    //通用接口定义图标
+    //尺寸 36*36
+    function nationalMarker(longitude, latitude, iconType) {
+        if (marker) map.removeOverLay(marker);
+        let _icon = createIcon(iconType);
+        marker = createMarker(longitude, latitude, _icon)
+        map.addOverLay(marker);
+        //聚焦
+        map.setViewport([new T.LngLat(longitude, latitude)])
+    }
+
+    //添加手机地图方法
+    function addZoomstart() {
+        map.addEventListener("zoomstart", function (e) {
+            longpressFlag = true;
+        });
+        map.addEventListener("zoomend", function (e) {
+            //longpressFlag = false;
+            longpressFlag = true;
+            if (longpressTimeOut) clearTimeout(longpressTimeOut);
+            longpressTimeOut = setTimeout(function () {
+                longpressFlag = false;
+            }, 500)
+        });
+    }
+    //禁用拖拽
+    function addDragstart() {
+        map.addEventListener("dragstart", function (e) {
+            longpressFlag = true;
+        });
+        map.addEventListener("dragend", function (e) {
+            longpressFlag = false;
+        });
+    }
+
+    //给地图添加长按点击事件
+    function addLongpress() {
+        if (!map) {
+            initMap()
+        }
+        addZoomstart()
+        addDragstart()
+        map.addEventListener("longpress", function (e) {
+            setTimeout(function () {
+                onLoadPoint(e.lnglat.lng, e.lnglat.lat)
+            })
+        });
+    }
+</script>
+
+</html>
